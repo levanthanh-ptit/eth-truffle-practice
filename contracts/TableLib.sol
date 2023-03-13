@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-library TableLib {
-    struct Holder {
-        address player;
-        uint256[] cards;
-        uint256 betAmount;
-    }
+struct Holder {
+    uint256[] cards;
+    uint256 betAmount;
+}
 
+library TableLib {
     function freshUnbox(uint256[] storage cards) public {
         require(cards.length == 0);
         for (uint256 i = 0; i < 52; i++) {
@@ -30,8 +29,9 @@ library TableLib {
     }
 
     function randomUint(uint256 maxium) private view returns (uint256) {
-        uint256 seed = (block.timestamp + block.difficulty + block.number) %
-            100;
+        uint256 seed = uint256(
+            block.timestamp + block.difficulty + block.number
+        ) % 100;
 
         return
             uint256(
