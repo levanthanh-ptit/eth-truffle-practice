@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./TableLib.sol";
 
-contract ThreeCard is Ownable {
+contract ThreeCards is Ownable {
     IERC20 public token;
 
     uint256 public pot = 0;
@@ -38,7 +38,7 @@ contract ThreeCard is Ownable {
     }
 
     function buyIn(uint256 _amount) public canBet(_amount) {
-        token.transfer(address(this), _amount);
+        token.transferFrom(msg.sender, address(this), _amount);
         Holder storage holder = addressHoldersMap[msg.sender];
         /** Add data */
         holder.betAmount += _amount;
@@ -61,9 +61,13 @@ contract ThreeCard is Ownable {
             Holder memory holder = addressHoldersMap[index[i]];
             uint256 sum = 0;
             for (uint256 j = 0; j < holder.cards.length; j++) {
-                sum += holder.cards[j];
+                if (holder.cards[j] > 10) {
+                    sum += 10;
+                } else {
+                    sum += holder.cards[j];
+                }
             }
-            sum %= 13;
+            sum %= 10;
             if (sum > max) {
                 max = sum;
                 w = index[i];
@@ -72,12 +76,12 @@ contract ThreeCard is Ownable {
         winner = w;
     }
 
-    modifier canWithdrawn() {
+    modifier canWithdraw() {
         require(msg.sender == winner, "you are loser");
         _;
     }
 
-    function withdrawn() public canWithdrawn {
-        token.transferFrom(address(this), msg.sender, pot);
+    function withdraw() public canWithdraw {
+        token.transfer(msg.sender, pot);
     }
 }
