@@ -60,6 +60,7 @@ contract('[feature] 3-cards game', function (accounts) {
     await token.approve(game.address, peterBet, { from: peter });
     await game.buyIn(peterBet, { from: peter });
     await printState(game.address, peter, 'Peter');
+
     /** Jack places bet */
     const jackBet = parseUnits('3', tokenDecimals).toString();
     /** Pre-flight, approve amount step */

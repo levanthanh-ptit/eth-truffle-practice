@@ -3,9 +3,14 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+
 import "./TableLib.sol";
 
 contract ThreeCards is Ownable {
+    using Counters for Counters.Counter;
+    using TableLib for *;
+
     IERC20 public token;
 
     uint256 public pot = 0;
@@ -16,7 +21,7 @@ contract ThreeCards is Ownable {
 
     address winner;
 
-    uint256 private _idx = 0;
+    Counters.Counter private _idx;
     mapping(uint256 => address) private index;
     mapping(address => Holder) private addressHoldersMap;
 
@@ -44,8 +49,8 @@ contract ThreeCards is Ownable {
         holder.betAmount += _amount;
         TableLib.pickCards(cards, holder, 3);
         /** Indexing */
-        index[_idx] = msg.sender;
-        _idx += 1;
+        index[_idx.current()] = msg.sender;
+        _idx.increment();
         /** Increase pot amount */
         pot += _amount;
     }
@@ -57,7 +62,7 @@ contract ThreeCards is Ownable {
     function showOff() public onlyOwner {
         uint256 max = 0;
         address w;
-        for (uint256 i = 0; i < _idx; i++) {
+        for (uint256 i = 0; i < _idx.current(); i++) {
             Holder memory holder = addressHoldersMap[index[i]];
             uint256 sum = 0;
             for (uint256 j = 0; j < holder.cards.length; j++) {

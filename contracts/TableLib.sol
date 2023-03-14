@@ -7,7 +7,7 @@ struct Holder {
 }
 
 library TableLib {
-    function freshUnbox(uint256[] storage cards) public {
+    function freshUnbox(uint256[] storage cards) internal {
         require(cards.length == 0);
         for (uint256 i = 0; i < 52; i++) {
             uint256 cardValue = (i % 13) + 1;
@@ -19,7 +19,7 @@ library TableLib {
         uint256[] storage cardBox,
         Holder storage holder,
         uint256 numOfCard
-    ) public {
+    ) internal {
         for (uint256 i = 0; i < numOfCard; i++) {
             uint256 index = randomUint(cardBox.length);
             holder.cards.push(cardBox[index]);
