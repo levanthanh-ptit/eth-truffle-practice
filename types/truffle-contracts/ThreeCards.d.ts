@@ -7,200 +7,231 @@ import { EventData, PastEventOptions } from "web3-eth-contract";
 
 export interface ThreeCardsContract
   extends Truffle.Contract<ThreeCardsInstance> {
-  "new"(
-    _token: string,
-    _minBet: number | BN | string,
-    _maxBet: number | BN | string,
-    meta?: Truffle.TransactionDetails
-  ): Promise<ThreeCardsInstance>;
+  "new"(meta?: Truffle.TransactionDetails): Promise<ThreeCardsInstance>;
 }
 
-export interface OwnershipTransferred {
-  name: "OwnershipTransferred";
+export interface GameCreated {
+  name: "GameCreated";
   args: {
-    previousOwner: string;
-    newOwner: string;
-    0: string;
+    gameId: BN;
+    dealer: string;
+    0: BN;
     1: string;
   };
 }
 
-type AllEvents = OwnershipTransferred;
+type AllEvents = GameCreated;
 
 export interface ThreeCardsInstance extends Truffle.ContractInstance {
-  maxBet(txDetails?: Truffle.TransactionDetails): Promise<BN>;
-
-  minBet(txDetails?: Truffle.TransactionDetails): Promise<BN>;
-
-  /**
-   * Returns the address of the current owner.
-   */
-  owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-  pot(txDetails?: Truffle.TransactionDetails): Promise<BN>;
-
-  /**
-   * Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.
-   */
-  renounceOwnership: {
-    (txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(txDetails?: Truffle.TransactionDetails): Promise<void>;
-    sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
-    estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
-  };
-
-  token(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-  /**
-   * Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.
-   */
-  transferOwnership: {
-    (newOwner: string, txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
+  initGame: {
+    (
+      _token: string,
+      _minBet: number | BN | string,
+      _maxBet: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      newOwner: string,
+      _token: string,
+      _minBet: number | BN | string,
+      _maxBet: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
-      newOwner: string,
+      _token: string,
+      _minBet: number | BN | string,
+      _maxBet: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      newOwner: string,
+      _token: string,
+      _minBet: number | BN | string,
+      _maxBet: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
 
   buyIn: {
     (
+      _gameId: number | BN | string,
       _amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
+      _gameId: number | BN | string,
       _amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
+      _gameId: number | BN | string,
       _amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
+      _gameId: number | BN | string,
       _amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
 
+  getGameData(
+    _gameId: number | BN | string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<{
+    dealer: string;
+    token: string;
+    pot: BN;
+    minBet: BN;
+    maxBet: BN;
+    winners: string[];
+  }>;
+
   getBet(
+    _gameId: number | BN | string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<{ cards: BN[]; betAmount: BN }>;
 
   showOff: {
-    (txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(txDetails?: Truffle.TransactionDetails): Promise<void>;
-    sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
-    estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
+    (
+      _gameId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      _gameId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      _gameId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      _gameId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
   };
 
   withdraw: {
-    (txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(txDetails?: Truffle.TransactionDetails): Promise<void>;
-    sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
-    estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
+    (
+      _gameId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      _gameId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      _gameId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      _gameId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
   };
 
   methods: {
-    maxBet(txDetails?: Truffle.TransactionDetails): Promise<BN>;
-
-    minBet(txDetails?: Truffle.TransactionDetails): Promise<BN>;
-
-    /**
-     * Returns the address of the current owner.
-     */
-    owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    pot(txDetails?: Truffle.TransactionDetails): Promise<BN>;
-
-    /**
-     * Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.
-     */
-    renounceOwnership: {
-      (txDetails?: Truffle.TransactionDetails): Promise<
-        Truffle.TransactionResponse<AllEvents>
-      >;
-      call(txDetails?: Truffle.TransactionDetails): Promise<void>;
-      sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
-      estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
-    };
-
-    token(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    /**
-     * Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.
-     */
-    transferOwnership: {
-      (newOwner: string, txDetails?: Truffle.TransactionDetails): Promise<
-        Truffle.TransactionResponse<AllEvents>
-      >;
+    initGame: {
+      (
+        _token: string,
+        _minBet: number | BN | string,
+        _maxBet: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        newOwner: string,
+        _token: string,
+        _minBet: number | BN | string,
+        _maxBet: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
-        newOwner: string,
+        _token: string,
+        _minBet: number | BN | string,
+        _maxBet: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        newOwner: string,
+        _token: string,
+        _minBet: number | BN | string,
+        _maxBet: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
 
     buyIn: {
       (
+        _gameId: number | BN | string,
         _amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
+        _gameId: number | BN | string,
         _amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
+        _gameId: number | BN | string,
         _amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
+        _gameId: number | BN | string,
         _amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
 
+    getGameData(
+      _gameId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<{
+      dealer: string;
+      token: string;
+      pot: BN;
+      minBet: BN;
+      maxBet: BN;
+      winners: string[];
+    }>;
+
     getBet(
+      _gameId: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<{ cards: BN[]; betAmount: BN }>;
 
     showOff: {
-      (txDetails?: Truffle.TransactionDetails): Promise<
-        Truffle.TransactionResponse<AllEvents>
-      >;
-      call(txDetails?: Truffle.TransactionDetails): Promise<void>;
-      sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
-      estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
+      (
+        _gameId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        _gameId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        _gameId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        _gameId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
     };
 
     withdraw: {
-      (txDetails?: Truffle.TransactionDetails): Promise<
-        Truffle.TransactionResponse<AllEvents>
-      >;
-      call(txDetails?: Truffle.TransactionDetails): Promise<void>;
-      sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
-      estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
+      (
+        _gameId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        _gameId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        _gameId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        _gameId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
     };
   };
 

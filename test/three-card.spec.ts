@@ -11,33 +11,31 @@ contract('[feature] 3-cards game', function (accounts) {
   const jack = accounts[3];
   let token: MyTokenInstance;
   let tokenDecimals: number;
-  let game: ThreeCardsInstance;
+  let contract: ThreeCardsInstance;
+  let gameId: BN;
 
   /**
    * Reusable methods
    */
-  async function printState(address: string, sender: string, name: string) {
-    const instance = await ThreeCards.at(address);
+  async function printState(sender: string, name: string) {
     console.log(`==========${name} stage view==========`);
-    const currentPot = await instance.pot({ from: sender });
-    const currentBet = await instance.getBet({ from: sender });
-    console.log('Current Pot:', formatUnits(currentPot.toString(), tokenDecimals));
+    const gameData = await contract.getGameData(gameId, { from: sender });
+    const currentBet = await contract.getBet(gameId, { from: sender });
+    console.log('Current Pot:', formatUnits(gameData.pot.toString(), tokenDecimals));
     console.log(`Current ${name}'s Bet:`);
     console.log('$$', formatUnits(currentBet.betAmount.toString(), tokenDecimals));
     console.log('cards:', currentBet.cards);
     console.log(`==========${name} stage view==========`);
   }
 
-  async function newGame(): Promise<ThreeCardsInstance> {
-    const minBet = parseUnits('1', tokenDecimals).toString();
-    const maxBet = parseUnits('100', tokenDecimals).toString();
-    return ThreeCards.new(token.address, minBet, maxBet, { from: dealer });
-  }
-
   async function printBalance(address: string, name: string) {
     const balance = await token.balanceOf(address, { from: address });
     console.log(`${name} balance:`, formatUnits(balance.toString(), tokenDecimals));
   }
+
+  before('Contract deployed', async function () {
+    contract = await ThreeCards.deployed();
+  });
 
   /** Banker sells chips */
   before('Should buy chips from banker', async function () {
@@ -50,34 +48,40 @@ contract('[feature] 3-cards game', function (accounts) {
 
   it('success deploy a game', async function () {
     /** Dealer new a game */
-    game = await newGame();
+    const minBet = parseUnits('1', tokenDecimals).toString();
+    const maxBet = parseUnits('100', tokenDecimals).toString();
+    const tx = await contract.initGame(token.address, minBet, maxBet, { from: dealer });
+    const {
+      logs: [{ args }],
+    } = tx;
+    gameId = args.gameId;
   });
 
   it('success playing bets', async function () {
     /** Peter places bet */
     const peterBet = parseUnits('2', tokenDecimals).toString();
     /** Pre-flight, approve amount step */
-    await token.approve(game.address, peterBet, { from: peter });
-    await game.buyIn(peterBet, { from: peter });
-    await printState(game.address, peter, 'Peter');
+    await token.approve(contract.address, peterBet, { from: peter });
+    await contract.buyIn(gameId, peterBet, { from: peter });
+    await printState(peter, 'Peter');
 
     /** Jack places bet */
     const jackBet = parseUnits('3', tokenDecimals).toString();
     /** Pre-flight, approve amount step */
-    await token.approve(game.address, jackBet, { from: jack });
-    await game.buyIn(jackBet, { from: jack });
-    await printState(game.address, jack, 'Jack');
+    await token.approve(contract.address, jackBet, { from: jack });
+    await contract.buyIn(gameId, jackBet, { from: jack });
+    await printState(jack, 'Jack');
   });
 
   it('success show off', async function () {
     /** Dealer shows off */
-    await game.showOff({ from: dealer });
+    await contract.showOff(gameId, { from: dealer });
   });
 
   it('Success withdraw', async function () {
     /** Peter withdrawn */
     try {
-      await game.withdraw({ from: peter });
+      await contract.withdraw(gameId, { from: peter });
     } catch (e) {
       console.log('ERROR: Peter:', (e as EthersError).message);
     }
@@ -85,7 +89,7 @@ contract('[feature] 3-cards game', function (accounts) {
 
     /** Jack withdrawn */
     try {
-      await game.withdraw({ from: jack });
+      await contract.withdraw(gameId, { from: jack });
     } catch (e) {
       console.log('ERROR: Jack:', (e as EthersError).message);
     }
